@@ -1,7 +1,7 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from '@google/genai';
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// Using Google's Gemini model instead of OpenAI
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 export interface AIAssistantRequest {
   content: string;
@@ -49,18 +49,23 @@ export class AIAssistantService {
     }
 
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-        max_tokens: 1000,
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] }],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              improved_content: { type: "string" },
+              titles: { type: "array", items: { type: "string" } },
+              reasoning: { type: "string" }
+            }
+          }
+        }
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const result = JSON.parse(response.text || '{}');
 
       // Handle different response formats based on action
       if (action === 'suggest-title') {
@@ -86,24 +91,30 @@ export class AIAssistantService {
 
   async generateQuestionSuggestions(topic: string): Promise<string[]> {
     try {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant that generates relevant follow-up questions for Q&A platforms. Generate questions that would be useful for learning and discussion."
-          },
-          {
-            role: "user",
-            content: `Generate 5 relevant questions about: ${topic}\n\nReturn as JSON with format: {"questions": ["question1", "question2", ...]}`
+      const response = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ 
+          role: "user", 
+          parts: [{ 
+            text: `You are a helpful assistant that generates relevant follow-up questions for Q&A platforms. Generate questions that would be useful for learning and discussion.
+
+Generate 5 relevant questions about: ${topic}
+
+Return as JSON with format: {"questions": ["question1", "question2", ...]}` 
+          }] 
+        }],
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              questions: { type: "array", items: { type: "string" } }
+            }
           }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.8,
-        max_tokens: 500,
+        }
       });
 
-      const result = JSON.parse(response.choices[0].message.content || '{}');
+      const result = JSON.parse(response.text || '{}');
       return result.questions || [];
     } catch (error) {
       console.error('AI Question Generation Error:', error);
