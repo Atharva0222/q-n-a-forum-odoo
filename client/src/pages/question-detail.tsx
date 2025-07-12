@@ -25,13 +25,13 @@ export default function QuestionDetail() {
 
   // Fetch question details
   const { data: question, isLoading: questionLoading } = useQuery({
-    queryKey: ['/api/questions', questionId],
+    queryKey: [`/api/questions/${questionId}`],
     enabled: !isNaN(questionId),
   });
 
   // Fetch answers
   const { data: answers, isLoading: answersLoading } = useQuery({
-    queryKey: ['/api/questions', questionId, 'answers'],
+    queryKey: [`/api/questions/${questionId}/answers`],
     enabled: !isNaN(questionId),
   });
 
@@ -47,7 +47,7 @@ export default function QuestionDetail() {
         description: "Your answer has been posted!",
       });
       setAnswerContent("");
-      queryClient.invalidateQueries({ queryKey: ['/api/questions', questionId, 'answers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/questions/${questionId}/answers`] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -84,8 +84,8 @@ export default function QuestionDetail() {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/questions', questionId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/questions', questionId, 'answers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/questions/${questionId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/questions/${questionId}/answers`] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -118,8 +118,8 @@ export default function QuestionDetail() {
         title: "Success",
         description: "Answer accepted!",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/questions', questionId] });
-      queryClient.invalidateQueries({ queryKey: ['/api/questions', questionId, 'answers'] });
+      queryClient.invalidateQueries({ queryKey: [`/api/questions/${questionId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/questions/${questionId}/answers`] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -270,7 +270,7 @@ export default function QuestionDetail() {
 
               {/* Tags */}
               <div className="flex items-center space-x-2 mb-4 flex-wrap gap-1">
-                {questionData.tags.map((tag) => (
+                {questionData.tags && questionData.tags.length > 0 && questionData.tags.map((tag) => (
                   <Badge 
                     key={tag.id} 
                     variant="secondary"
@@ -289,25 +289,27 @@ export default function QuestionDetail() {
                     <span className="text-gray-600">{questionData.views || 0} views</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={questionData.author.profileImageUrl || undefined} />
-                    <AvatarFallback>
-                      {questionData.author.firstName?.[0] || questionData.author.email?.[0] || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-gray-600">
-                    asked by{" "}
-                    <span className="font-medium">
-                      {questionData.author.firstName && questionData.author.lastName
-                        ? `${questionData.author.firstName} ${questionData.author.lastName}`
-                        : questionData.author.email}
+                {questionData.author && (
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={questionData.author.profileImageUrl || undefined} />
+                      <AvatarFallback>
+                        {questionData.author.firstName?.[0] || questionData.author.email?.[0] || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-gray-600">
+                      asked by{" "}
+                      <span className="font-medium">
+                        {questionData.author.firstName && questionData.author.lastName
+                          ? `${questionData.author.firstName} ${questionData.author.lastName}`
+                          : questionData.author.email}
+                      </span>
                     </span>
-                  </span>
-                  <span className="text-gray-400">
-                    {formatDistanceToNow(new Date(questionData.createdAt!), { addSuffix: true })}
-                  </span>
-                </div>
+                    <span className="text-gray-400">
+                      {formatDistanceToNow(new Date(questionData.createdAt!), { addSuffix: true })}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -323,7 +325,7 @@ export default function QuestionDetail() {
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
             </div>
-          ) : answers && answers.length > 0 ? (
+          ) : answers && Array.isArray(answers) && answers.length > 0 ? (
             <div className="space-y-6">
               {answers.map((answer: AnswerWithDetails) => (
                 <div key={answer.id} className="bg-white border border-gray-200 rounded-lg p-6">
