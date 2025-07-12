@@ -358,6 +358,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gamification routes
+  app.get('/api/gamification/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getUserStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching gamification stats:', error);
+      res.status(500).json({ message: 'Failed to fetch stats' });
+    }
+  });
+
+  app.get('/api/gamification/badges', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const badges = await storage.getUserBadges(userId);
+      res.json(badges);
+    } catch (error) {
+      console.error('Error fetching user badges:', error);
+      res.status(500).json({ message: 'Failed to fetch badges' });
+    }
+  });
+
+  app.get('/api/gamification/pathways', isAuthenticated, async (req: any, res) => {
+    try {
+      const pathways = await storage.getPathways();
+      res.json(pathways);
+    } catch (error) {
+      console.error('Error fetching pathways:', error);
+      res.status(500).json({ message: 'Failed to fetch pathways' });
+    }
+  });
+
+  app.get('/api/gamification/user-pathways', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userPathways = await storage.getUserPathways(userId);
+      res.json(userPathways);
+    } catch (error) {
+      console.error('Error fetching user pathways:', error);
+      res.status(500).json({ message: 'Failed to fetch user pathways' });
+    }
+  });
+
+  app.post('/api/gamification/pathways/:id/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const pathwayId = parseInt(req.params.id);
+      const userPathway = await storage.startUserPathway(userId, pathwayId);
+      res.json(userPathway);
+    } catch (error) {
+      console.error('Error starting pathway:', error);
+      res.status(500).json({ message: 'Failed to start pathway' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

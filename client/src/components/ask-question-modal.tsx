@@ -5,7 +5,8 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { TiptapEditor } from "./ui/tiptap-editor";
 import { Badge } from "./ui/badge";
-import { X } from "lucide-react";
+import { Switch } from "./ui/switch";
+import { X, EyeOff, Eye } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +25,7 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
   const [tagInput, setTagInput] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [suggestions, setSuggestions] = useState<Tag[]>([]);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -36,7 +38,7 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
   });
 
   const createQuestionMutation = useMutation({
-    mutationFn: async (data: { title: string; content: string; tags: string[] }) => {
+    mutationFn: async (data: { title: string; content: string; tags: string[]; isAnonymous: boolean }) => {
       const response = await apiRequest('POST', '/api/questions', data);
       return response.json();
     },
@@ -74,6 +76,7 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
     setTagInput("");
     setSelectedTags([]);
     setSuggestions([]);
+    setIsAnonymous(false);
     onClose();
   };
 
@@ -122,6 +125,7 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
       title: title.trim(),
       content,
       tags: selectedTags,
+      isAnonymous,
     });
   };
 
@@ -245,6 +249,33 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
               <p className="text-xs text-gray-500 mt-1">
                 Add up to 5 relevant tags to help others find your question
               </p>
+            </div>
+          </div>
+
+          {/* Anonymity Toggle */}
+          <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="anonymous-toggle"
+                checked={isAnonymous}
+                onCheckedChange={setIsAnonymous}
+              />
+              <Label htmlFor="anonymous-toggle" className="text-sm font-medium">
+                Ask Anonymously
+              </Label>
+            </div>
+            <div className="flex items-center space-x-1 text-sm text-gray-600">
+              {isAnonymous ? (
+                <>
+                  <EyeOff className="h-4 w-4" />
+                  <span>Your identity will be hidden</span>
+                </>
+              ) : (
+                <>
+                  <Eye className="h-4 w-4" />
+                  <span>Your name will be visible</span>
+                </>
+              )}
             </div>
           </div>
 

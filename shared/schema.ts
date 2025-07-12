@@ -32,6 +32,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  xp: integer("xp").default(0),
+  level: integer("level").default(1),
+  streak: integer("streak").default(0),
+  lastActivityDate: timestamp("last_activity_date"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -44,6 +48,7 @@ export const questions = pgTable("questions", {
   views: integer("views").default(0),
   votes: integer("votes").default(0),
   acceptedAnswerId: integer("accepted_answer_id"),
+  isAnonymous: boolean("is_anonymous").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -55,6 +60,7 @@ export const answers = pgTable("answers", {
   authorId: varchar("author_id").notNull().references(() => users.id),
   votes: integer("votes").default(0),
   isAccepted: boolean("is_accepted").default(false),
+  isAnonymous: boolean("is_anonymous").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -94,6 +100,58 @@ export const notifications = pgTable("notifications", {
   triggeredById: varchar("triggered_by_id").references(() => users.id),
   isRead: boolean("is_read").default(false),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Gamification tables
+export const badges = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(),
+  category: varchar("category", { length: 50 }).notNull(), // 'activity', 'quality', 'community'
+  rarity: varchar("rarity", { length: 20 }).notNull(), // 'common', 'uncommon', 'rare', 'legendary'
+  xpReward: integer("xp_reward").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => badges.id),
+  earnedAt: timestamp("earned_at").defaultNow(),
+});
+
+export const pathways = pgTable("pathways", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(),
+  color: varchar("color", { length: 7 }).default("#3B82F6"),
+  totalSteps: integer("total_steps").notNull(),
+  xpReward: integer("xp_reward").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const pathwaySteps = pgTable("pathway_steps", {
+  id: serial("id").primaryKey(),
+  pathwayId: integer("pathway_id").notNull().references(() => pathways.id),
+  stepNumber: integer("step_number").notNull(),
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  target: varchar("target", { length: 50 }).notNull(), // 'questions', 'answers', 'votes_received', 'accepted_answers'
+  targetValue: integer("target_value").notNull(),
+  xpReward: integer("xp_reward").default(0),
+});
+
+export const userPathways = pgTable("user_pathways", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  pathwayId: integer("pathway_id").notNull().references(() => pathways.id),
+  currentStep: integer("current_step").default(1),
+  completedSteps: integer("completed_steps").default(0),
+  isCompleted: boolean("is_completed").default(false),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
 });
 
 // Relations

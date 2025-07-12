@@ -25,23 +25,23 @@ export class AIAssistantService {
 
     switch (action) {
       case 'polish':
-        systemPrompt = `You are a writing assistant that helps improve the quality of ${context}s on a Q&A platform. Focus on grammar, clarity, tone, and structure while maintaining the original meaning and technical accuracy.`;
-        userPrompt = `Please polish and improve this ${context}:\n\n${content}\n\nProvide the improved version and explain what you changed.`;
+        systemPrompt = `You are a writing assistant that helps improve the quality of ${context}s on a Q&A platform. Focus on grammar, clarity, tone, and structure while maintaining the original meaning and technical accuracy. Return your response in JSON format.`;
+        userPrompt = `Please polish and improve this ${context}:\n\n${content}\n\nReturn as JSON: {"improved_content": "improved text", "reasoning": "explanation of changes"}`;
         break;
 
       case 'suggest-title':
-        systemPrompt = `You are a title optimization expert for Q&A platforms. Create clear, specific, and searchable titles that accurately reflect the question's content.`;
-        userPrompt = `Based on this question content, suggest 3 better titles:\n\n${content}\n\nMake titles specific, searchable, and clear about what the person is asking.`;
+        systemPrompt = `You are a title optimization expert for Q&A platforms. Create clear, specific, and searchable titles that accurately reflect the question's content. Return your response in JSON format.`;
+        userPrompt = `Based on this question content, suggest 3 better titles:\n\n${content}\n\nMake titles specific, searchable, and clear about what the person is asking. Return as JSON: {"titles": ["title1", "title2", "title3"], "reasoning": "explanation"}`;
         break;
 
       case 'clarify':
-        systemPrompt = `You are a clarity expert who helps make technical content more understandable. Focus on structure, explanation, and removing ambiguity while keeping technical accuracy.`;
-        userPrompt = `Please make this ${context} clearer and easier to understand:\n\n${content}\n\nImprove structure, add explanations where needed, and remove ambiguity.`;
+        systemPrompt = `You are a clarity expert who helps make technical content more understandable. Focus on structure, explanation, and removing ambiguity while keeping technical accuracy. Return your response in JSON format.`;
+        userPrompt = `Please make this ${context} clearer and easier to understand:\n\n${content}\n\nReturn as JSON: {"improved_content": "clearer text", "reasoning": "explanation of improvements"}`;
         break;
 
       case 'concise':
-        systemPrompt = `You are an editing expert who makes content more concise while preserving all important information and technical details.`;
-        userPrompt = `Please make this ${context} more concise and to-the-point:\n\n${content}\n\nRemove unnecessary words while keeping all important information.`;
+        systemPrompt = `You are an editing expert who makes content more concise while preserving all important information and technical details. Return your response in JSON format.`;
+        userPrompt = `Please make this ${context} more concise and to-the-point:\n\n${content}\n\nReturn as JSON: {"improved_content": "concise text", "reasoning": "explanation of changes"}`;
         break;
 
       default:
@@ -67,15 +67,15 @@ export class AIAssistantService {
         return {
           originalContent: content,
           improvedContent: result.titles?.[0] || content,
-          suggestions: result.titles || [],
+          suggestions: result.titles || [result.title || content],
           reasoning: result.reasoning || "Generated title suggestions"
         };
       } else {
         return {
           originalContent: content,
-          improvedContent: result.improved_content || result.content || content,
+          improvedContent: result.improved_content || result.content || result.improved || content,
           suggestions: result.suggestions || [],
-          reasoning: result.reasoning || result.explanation || "Content improved"
+          reasoning: result.reasoning || result.explanation || result.changes || "Content improved"
         };
       }
     } catch (error) {

@@ -3,14 +3,16 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
-import { Search, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import { Search, ChevronDown, Settings, LogOut, User, Play } from "lucide-react";
 import { NotificationDropdown } from "./notification-dropdown";
 import { AskQuestionModal } from "./ask-question-modal";
+import { ReelsFeed } from "./reels-feed";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
 export function Header() {
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
+  const [isReelsFeedOpen, setIsReelsFeedOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, isAuthenticated } = useAuth();
 
@@ -47,6 +49,11 @@ export function Header() {
                   <Link href="/users">
                     <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
                       Users
+                    </span>
+                  </Link>
+                  <Link href="/gamification">
+                    <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                      Journey
                     </span>
                   </Link>
                 </nav>
@@ -112,6 +119,17 @@ export function Header() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
+                  {/* Reels Feed Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center space-x-1"
+                    onClick={() => setIsReelsFeedOpen(true)}
+                  >
+                    <Play className="h-4 w-4" />
+                    <span>Reels</span>
+                  </Button>
+
                   {/* Ask Question Button */}
                   <Button
                     className="bg-orange-500 text-white hover:bg-orange-600"
@@ -137,6 +155,10 @@ export function Header() {
         isOpen={isAskModalOpen}
         onClose={() => setIsAskModalOpen(false)}
       />
+
+      {isReelsFeedOpen && (
+        <ReelsFeed onClose={() => setIsReelsFeedOpen(false)} />
+      )}
     </>
   );
 }

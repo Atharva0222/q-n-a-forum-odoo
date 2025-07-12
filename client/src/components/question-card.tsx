@@ -85,17 +85,26 @@ export function QuestionCard({ question }: QuestionCardProps) {
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-2">
               <Avatar className="h-6 w-6">
-                <AvatarImage src={question.author.profileImageUrl || undefined} />
+                <AvatarImage src={question.isAnonymous ? undefined : question.author.profileImageUrl || undefined} />
                 <AvatarFallback>
-                  {question.author.firstName?.[0] || question.author.email?.[0] || 'U'}
+                  {question.isAnonymous ? '🥷' : question.author.firstName?.[0] || question.author.email?.[0] || 'U'}
                 </AvatarFallback>
               </Avatar>
               <span className="text-gray-600">
                 asked by{" "}
                 <span className="text-blue-600 hover:underline">
-                  {question.author.firstName && question.author.lastName
-                    ? `${question.author.firstName} ${question.author.lastName}`
-                    : question.author.email}
+                  {question.isAnonymous ? (
+                    <span className="flex items-center gap-1">
+                      <span className="text-gray-500">Anonymous</span>
+                      <Badge variant="outline" className="text-xs">
+                        🥷
+                      </Badge>
+                    </span>
+                  ) : (
+                    question.author.firstName && question.author.lastName
+                      ? `${question.author.firstName} ${question.author.lastName}`
+                      : question.author.email
+                  )}
                 </span>
               </span>
             </div>

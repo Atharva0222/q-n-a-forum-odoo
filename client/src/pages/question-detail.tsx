@@ -293,17 +293,26 @@ export default function QuestionDetail() {
                 {questionData.author && (
                   <div className="flex items-center space-x-2">
                     <Avatar className="h-6 w-6">
-                      <AvatarImage src={questionData.author.profileImageUrl || undefined} />
+                      <AvatarImage src={questionData.isAnonymous ? undefined : questionData.author.profileImageUrl || undefined} />
                       <AvatarFallback>
-                        {questionData.author.firstName?.[0] || questionData.author.email?.[0] || 'U'}
+                        {questionData.isAnonymous ? '🥷' : questionData.author.firstName?.[0] || questionData.author.email?.[0] || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <span className="text-gray-600">
                       asked by{" "}
                       <span className="font-medium">
-                        {questionData.author.firstName && questionData.author.lastName
-                          ? `${questionData.author.firstName} ${questionData.author.lastName}`
-                          : questionData.author.email}
+                        {questionData.isAnonymous ? (
+                          <span className="flex items-center gap-1">
+                            <span className="text-gray-500">Anonymous</span>
+                            <Badge variant="outline" className="text-xs">
+                              🥷 Anonymous
+                            </Badge>
+                          </span>
+                        ) : (
+                          questionData.author.firstName && questionData.author.lastName
+                            ? `${questionData.author.firstName} ${questionData.author.lastName}`
+                            : questionData.author.email
+                        )}
                       </span>
                     </span>
                     <span className="text-gray-400">

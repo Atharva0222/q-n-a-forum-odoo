@@ -10,6 +10,7 @@ import Home from "@/pages/home";
 import QuestionDetail from "@/pages/question-detail";
 import Tags from "@/pages/tags";
 import Users from "@/pages/users";
+import Gamification from "@/pages/gamification";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -24,6 +25,7 @@ function Router() {
           <Route path="/questions/:id" component={QuestionDetail} />
           <Route path="/tags" component={Tags} />
           <Route path="/users" component={Users} />
+          <Route path="/gamification" component={Gamification} />
         </>
       )}
       <Route component={NotFound} />

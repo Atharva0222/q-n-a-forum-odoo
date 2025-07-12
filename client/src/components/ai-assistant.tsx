@@ -45,10 +45,8 @@ export function AIAssistant({
     setCurrentAction(action);
 
     try {
-      const result = await apiRequest('/api/ai/assist', {
-        method: 'POST',
-        body: { content, action, context }
-      });
+      const response = await apiRequest('POST', '/api/ai/assist', { content, action, context });
+      const result = await response.json();
 
       setLastResult(result);
       

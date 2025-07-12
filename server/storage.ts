@@ -67,6 +67,23 @@ export interface IStorage {
     totalAnswers: number;
     totalUsers: number;
   }>;
+
+  // Gamification
+  getUserStats(userId: string): Promise<{
+    xp: number;
+    level: number;
+    streak: number;
+    questionsAsked: number;
+    answersProvided: number;
+    votesReceived: number;
+    acceptedAnswers: number;
+  }>;
+  getUserBadges(userId: string): Promise<any[]>;
+  getPathways(): Promise<any[]>;
+  getUserPathways(userId: string): Promise<any[]>;
+  startUserPathway(userId: string, pathwayId: number): Promise<any>;
+  updateUserXP(userId: string, xpGain: number): Promise<void>;
+  checkBadgeEligibility(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -610,6 +627,91 @@ export class DatabaseStorage implements IStorage {
       '#6366F1', // indigo
     ];
     return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  // Gamification methods
+  async getUserStats(userId: string): Promise<{
+    xp: number;
+    level: number;
+    streak: number;
+    questionsAsked: number;
+    answersProvided: number;
+    votesReceived: number;
+    acceptedAnswers: number;
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const questionsAsked = await this.db.select({ count: sql<number>`count(*)` })
+      .from(questions)
+      .where(eq(questions.authorId, userId))
+      .then(result => result[0]?.count || 0);
+
+    const answersProvided = await this.db.select({ count: sql<number>`count(*)` })
+      .from(answers)
+      .where(eq(answers.authorId, userId))
+      .then(result => result[0]?.count || 0);
+
+    const votesReceived = await this.db.select({ 
+      totalVotes: sql<number>`sum(${questions.votes}) + sum(${answers.votes})` 
+    })
+      .from(questions)
+      .leftJoin(answers, eq(answers.authorId, userId))
+      .where(eq(questions.authorId, userId))
+      .then(result => result[0]?.totalVotes || 0);
+
+    const acceptedAnswers = await this.db.select({ count: sql<number>`count(*)` })
+      .from(answers)
+      .where(and(eq(answers.authorId, userId), eq(answers.isAccepted, true)))
+      .then(result => result[0]?.count || 0);
+
+    return {
+      xp: user.xp || 0,
+      level: user.level || 1,
+      streak: user.streak || 0,
+      questionsAsked,
+      answersProvided,
+      votesReceived,
+      acceptedAnswers,
+    };
+  }
+
+  async getUserBadges(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async getPathways(): Promise<any[]> {
+    return [];
+  }
+
+  async getUserPathways(userId: string): Promise<any[]> {
+    return [];
+  }
+
+  async startUserPathway(userId: string, pathwayId: number): Promise<any> {
+    return {};
+  }
+
+  async updateUserXP(userId: string, xpGain: number): Promise<void> {
+    const user = await this.getUser(userId);
+    if (!user) return;
+
+    const newXP = (user.xp || 0) + xpGain;
+    const newLevel = Math.floor(Math.sqrt(newXP / 100)) + 1;
+
+    await this.db.update(users)
+      .set({
+        xp: newXP,
+        level: newLevel,
+        lastActivityDate: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async checkBadgeEligibility(userId: string): Promise<void> {
+    // Badge checking implementation will be added later
   }
 }
 
