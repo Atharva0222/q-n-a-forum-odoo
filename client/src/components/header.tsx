@@ -39,12 +39,16 @@ export function Header() {
                       Questions
                     </span>
                   </Link>
-                  <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                    Tags
-                  </span>
-                  <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
-                    Users
-                  </span>
+                  <Link href="/tags">
+                    <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                      Tags
+                    </span>
+                  </Link>
+                  <Link href="/users">
+                    <span className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium cursor-pointer">
+                      Users
+                    </span>
+                  </Link>
                 </nav>
               )}
             </div>

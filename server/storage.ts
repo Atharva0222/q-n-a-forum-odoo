@@ -29,6 +29,7 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getUsers(): Promise<User[]>;
 
   // Question operations
   createQuestion(question: InsertQuestion, tagNames: string[]): Promise<QuestionWithDetails>;
@@ -88,6 +89,10 @@ export class DatabaseStorage implements IStorage {
       })
       .returning();
     return user;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
   // Question operations
