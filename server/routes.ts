@@ -9,6 +9,7 @@ import {
   insertTagSchema 
 } from "@shared/schema";
 import { z } from "zod";
+import { aiAssistant } from "./ai-service";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -321,6 +322,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching stats:", error);
       res.status(500).json({ message: "Failed to fetch stats" });
+    }
+  });
+
+  // AI Assistant routes
+  app.post('/api/ai/assist', isAuthenticated, async (req: any, res) => {
+    try {
+      const { content, action, context } = req.body;
+      
+      if (!content || !action) {
+        return res.status(400).json({ message: "Content and action are required" });
+      }
+
+      const result = await aiAssistant.processContent({ content, action, context });
+      res.json(result);
+    } catch (error) {
+      console.error("Error processing AI assist:", error);
+      res.status(500).json({ message: "Failed to process AI assistance" });
+    }
+  });
+
+  app.post('/api/ai/question-suggestions', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topic } = req.body;
+      
+      if (!topic) {
+        return res.status(400).json({ message: "Topic is required" });
+      }
+
+      const suggestions = await aiAssistant.generateQuestionSuggestions(topic);
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("Error generating question suggestions:", error);
+      res.status(500).json({ message: "Failed to generate question suggestions" });
     }
   });
 

@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { AIAssistant } from "@/components/ai-assistant";
 
 export default function QuestionDetail() {
   const { id } = useParams();
@@ -423,6 +424,17 @@ export default function QuestionDetail() {
                 placeholder="Write your answer here..."
                 className="mb-4"
               />
+              
+              {/* AI Assistant for Answer */}
+              <div className="mb-4">
+                <AIAssistant
+                  content={answerContent}
+                  onContentChange={setAnswerContent}
+                  context="answer"
+                  showTitleSuggestion={false}
+                />
+              </div>
+              
               <Button
                 type="submit"
                 className="bg-orange-500 hover:bg-orange-600"

@@ -11,6 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Tag } from "@shared/schema";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { AIAssistant } from "./ai-assistant";
 
 interface AskQuestionModalProps {
   isOpen: boolean;
@@ -148,6 +149,16 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
             />
           </div>
 
+          {/* AI Assistant for Title */}
+          <div className="space-y-3">
+            <AIAssistant
+              content={title}
+              onContentChange={setTitle}
+              context="question"
+              showTitleSuggestion={true}
+            />
+          </div>
+
           {/* Rich Text Editor */}
           <div>
             <Label className="text-sm font-medium text-gray-700">
@@ -158,6 +169,16 @@ export function AskQuestionModal({ isOpen, onClose }: AskQuestionModalProps) {
                 content={content}
                 onChange={setContent}
                 placeholder="Provide details about your question. Include what you've tried, what you expected to happen, and what actually happened."
+              />
+            </div>
+            
+            {/* AI Assistant for Content */}
+            <div className="mt-3">
+              <AIAssistant
+                content={content}
+                onContentChange={setContent}
+                context="question"
+                showTitleSuggestion={false}
               />
             </div>
           </div>
