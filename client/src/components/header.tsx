@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Search, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Search, ChevronDown, Settings, LogOut, User } from "lucide-react";
 import { NotificationDropdown } from "./notification-dropdown";
 import { AskQuestionModal } from "./ask-question-modal";
 import { useAuth } from "@/hooks/useAuth";
@@ -71,21 +72,41 @@ export function Header() {
                   {/* Notification Bell */}
                   <NotificationDropdown />
 
-                  {/* User Profile */}
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user?.profileImageUrl || undefined} />
-                      <AvatarFallback>
-                        {user?.firstName?.[0] || user?.email?.[0] || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium text-gray-900 hidden sm:block">
-                      {user?.firstName && user?.lastName
-                        ? `${user.firstName} ${user.lastName}`
-                        : user?.email}
-                    </span>
-                    <ChevronDown className="h-4 w-4 text-gray-400" />
-                  </div>
+                  {/* User Profile Dropdown */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex items-center space-x-2 hover:bg-gray-50 rounded-md px-2 py-1 transition-colors">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.profileImageUrl || undefined} />
+                        <AvatarFallback>
+                          {user?.firstName?.[0] || user?.email?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium text-gray-900 hidden sm:block">
+                        {user?.firstName && user?.lastName
+                          ? `${user.firstName} ${user.lastName}`
+                          : user?.email}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-gray-400" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
+                        <User className="h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
+                        <Settings className="h-4 w-4" />
+                        <span>Settings</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="flex items-center space-x-2 cursor-pointer text-red-600 hover:text-red-700"
+                        onClick={() => window.location.href = '/api/logout'}
+                      >
+                        <LogOut className="h-4 w-4" />
+                        <span>Logout</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
 
                   {/* Ask Question Button */}
                   <Button
